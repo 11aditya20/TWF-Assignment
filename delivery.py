@@ -1,5 +1,4 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 from typing import Dict, List, Tuple
 from itertools import permutations
 
@@ -17,13 +16,10 @@ distances = {
     ("C1", "L1"): 3, ("C2", "L1"): 2.5, ("C3", "L1"): 2,
     ("C1", "C2"): 4, ("C2", "C3"): 3, ("C1", "C3"): 7
 }
-
-# Making distances bidirectional
+# Make distances bidirectional
 for (a, b), d in list(distances.items()):
     distances[(b, a)] = d
 
-
-# Logic for cost calculation
 def cost_per_distance(weight: float) -> float:
     if weight <= 5:
         return 10
@@ -84,14 +80,10 @@ def compute_min_cost(order: Dict[str, int]) -> float:
 
     return min_cost
 
-# API
-class OrderRequest(BaseModel):
-    order: Dict[str, int]
-
 @app.post("/calculate")
-def calculate_cost(data: OrderRequest):
+async def calculate_cost(order: Dict[str, int]):
     try:
-        cost = compute_min_cost(data.order)
+        cost = compute_min_cost(order)
         return {"minimum_cost": cost}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
